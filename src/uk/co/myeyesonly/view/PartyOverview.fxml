@@ -35,7 +35,7 @@
                     <buttons>
                       <Button mnemonicParsing="false" onAction="#handleEncrypt" text="Encrypt" ButtonBar.buttonData="LEFT" />
                         <Button mnemonicParsing="false" text="Decrypt" ButtonBar.buttonData="LEFT" />
-                        <Button mnemonicParsing="false" text="Show My Public Key" ButtonBar.buttonData="LEFT" />
+                        <Button mnemonicParsing="false" onAction="#handleShowMyPublicKey" text="Show My Public Key" ButtonBar.buttonData="LEFT" />
                     </buttons>
                   </ButtonBar>
                   <ButtonBar layoutX="561.0" layoutY="338.0" AnchorPane.rightAnchor="5.0">
