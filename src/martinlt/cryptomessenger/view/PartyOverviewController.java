@@ -1,7 +1,11 @@
 package martinlt.cryptomessenger.view;
 
+import java.util.Base64;
+
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -98,7 +102,7 @@ public class PartyOverviewController
    {
       final Clipboard clipboard = Clipboard.getSystemClipboard();
       final ClipboardContent content = new ClipboardContent();
-      content.putString(wordWrap(outputLabel.getText(), 50));
+      content.putString(wordWrap(outputLabel.getText(), 80));
       clipboard.setContent(content);
    }
 
@@ -121,7 +125,39 @@ public class PartyOverviewController
 
                outputLabel.setText(mainApp.getCipherText());
             } catch (Exception ex) {
-               ex.printStackTrace();
+               Alert alert = new Alert(AlertType.ERROR);
+               alert.initOwner(mainApp.getPrimaryStage());
+               alert.setTitle("An error occurred");
+               alert.setHeaderText("Encryption error");
+               alert.setContentText("The text you provided could not be encrypted.");
+
+               alert.showAndWait();
+            }
+
+         }
+      }
+   }
+
+   @FXML
+   private void handleDecrypt()
+   {
+      Party party = partyComboBox.getSelectionModel().getSelectedItem();
+      if (party != null) {
+         String message = messageLabel.getText().replace(NEWLINE, "");
+
+         if (message != null) {
+            try {
+               mainApp.receiveAndDecryptMessage(Base64.getDecoder().decode(message));
+
+               outputLabel.setText(mainApp.getPlainText());
+            } catch (Exception ex) {
+               Alert alert = new Alert(AlertType.ERROR);
+               alert.initOwner(mainApp.getPrimaryStage());
+               alert.setTitle("An error occurred");
+               alert.setHeaderText("Decryption error");
+               alert.setContentText("The text you provided could not be decrypted.");
+
+               alert.showAndWait();
             }
 
          }
@@ -135,7 +171,7 @@ public class PartyOverviewController
    private void handleDeleteParty()
    {
       Party party = partyComboBox.getSelectionModel().getSelectedItem();
-      if(party != null)
+      if (party != null)
          mainApp.remove(party.getIdentifier());
    }
 
@@ -150,6 +186,9 @@ public class PartyOverviewController
     */
    public static String wordWrap(String in, int length)
    {
+      if (in == null)
+         return "";
+
       // :: Trim
       while (in.length() > 0 && (in.charAt(0) == '\t' || in.charAt(0) == ' '))
          in = in.substring(1);
@@ -174,6 +213,74 @@ public class PartyOverviewController
       // :: Split
       return in.substring(0, spaceIndex).trim() + NEWLINE
             + wordWrap(in.substring(spaceIndex), length);
+   }
+
+   /**
+    * Called when the user clicks the new button. Opens a dialog to edit details
+    * for a new party.
+    */
+   @FXML
+   private void handleNewParty()
+   {
+      Party tempParty = new Party();
+      boolean okClicked = mainApp.showPartyNewDialog(tempParty);
+      if (okClicked) {
+         try {
+            mainApp.receivePublicKeyFrom(tempParty.getIdentifier(), tempParty.getPublicKey());
+
+         } catch (martinlt.cryptomessenger.exception.SecurityException e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.initOwner(mainApp.getPrimaryStage());
+            alert.setTitle("An error has occurred");
+            alert.setHeaderText("Invalid public key");
+            alert.setContentText("The public key you have provided does not appear to be valid.");
+
+            alert.showAndWait();
+         }
+
+      }
+   }
+
+   /**
+    * Called when the user clicks the edit button. Opens a dialog to edit
+    * details for the selected party.
+    */
+   @FXML
+   private void handleEditParty()
+   {
+      Party selectedParty = partyComboBox.getSelectionModel().getSelectedItem();
+      if (selectedParty != null) {
+         String currentIdentifier = new String(selectedParty.getIdentifier());
+
+         boolean okClicked = mainApp.showPartyEditDialog(selectedParty);
+         if (okClicked) {
+            try {
+               mainApp.receivePublicKeyFrom(selectedParty.getIdentifier(), selectedParty.getPublicKey());
+               if (selectedParty.getIdentifier().compareTo(currentIdentifier) != 0)
+                  mainApp.remove(currentIdentifier);
+            } catch (martinlt.cryptomessenger.exception.SecurityException e) {
+               Alert alert = new Alert(AlertType.ERROR);
+               alert.initOwner(mainApp.getPrimaryStage());
+               alert.setTitle("An error has occurred");
+               alert.setHeaderText("Invalid public key");
+               alert.setContentText("The public key you have provided does not appear to be valid.");
+
+               alert.showAndWait();
+            }
+
+            showPartyDetails(selectedParty);
+         }
+
+      } else {
+         // Nothing selected.
+         Alert alert = new Alert(AlertType.WARNING);
+         alert.initOwner(mainApp.getPrimaryStage());
+         alert.setTitle("No Selection");
+         alert.setHeaderText("No Party Selected");
+         alert.setContentText("Please select a party from the list.");
+
+         alert.showAndWait();
+      }
    }
 
 }

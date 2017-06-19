@@ -24,17 +24,20 @@
                   </Label>
                   <ButtonBar layoutX="232.0" layoutY="10.0" AnchorPane.leftAnchor="232.0" AnchorPane.topAnchor="5.0">
                     <buttons>
-                        <Button mnemonicParsing="false" text="Edit..." ButtonBar.buttonData="LEFT" />
+                        <Button mnemonicParsing="false" onAction="#handleEditParty" text="Edit..." ButtonBar.buttonData="LEFT" />
                         <Button mnemonicParsing="false" onAction="#handleDeleteParty" text="Delete" ButtonBar.buttonData="LEFT" />
-                      <Button mnemonicParsing="false" text="New..." ButtonBar.buttonData="LEFT" />
+                      <Button mnemonicParsing="false" onAction="#handleNewParty" text="New..." ButtonBar.buttonData="LEFT" />
                     </buttons>
                   </ButtonBar>
                   <Label layoutY="157.0" text="Message:" AnchorPane.leftAnchor="5.0" />
-                  <TextArea fx:id="messageLabel" layoutX="4.0" layoutY="178.0" prefHeight="150.0" prefWidth="688.0" promptText="Enter message to encrypt/decrypt..." wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" />
+                  <TextArea fx:id="messageLabel" layoutX="4.0" layoutY="178.0" prefHeight="150.0" prefWidth="688.0" promptText="Enter message to encrypt/decrypt..." wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
+                     <font>
+                        <Font name="Courier New" size="12.0" />
+                     </font></TextArea>
                   <ButtonBar buttonMinWidth="125.0" layoutX="15.0" layoutY="338.0" AnchorPane.leftAnchor="5.0">
                     <buttons>
                       <Button mnemonicParsing="false" onAction="#handleEncrypt" text="Encrypt" ButtonBar.buttonData="LEFT" />
-                        <Button mnemonicParsing="false" text="Decrypt" ButtonBar.buttonData="LEFT" />
+                        <Button mnemonicParsing="false" onAction="#handleDecrypt" text="Decrypt" ButtonBar.buttonData="LEFT" />
                         <Button mnemonicParsing="false" onAction="#handleShowMyPublicKey" text="Show My Public Key" ButtonBar.buttonData="LEFT" />
                     </buttons>
                   </ButtonBar>

@@ -6,12 +6,15 @@ import java.security.NoSuchAlgorithmException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import martinlt.cryptomessenger.exception.NoSuchPublicKeyException;
 import martinlt.cryptomessenger.exception.SecurityException;
 import martinlt.cryptomessenger.model.Party;
+import martinlt.cryptomessenger.view.PartyEditDialogController;
 import martinlt.cryptomessenger.view.PartyOverviewController;
 
 import java.io.File;
@@ -124,11 +127,7 @@ public class MainApp extends Application
    public MainApp()
          throws NoSuchAlgorithmException, ClassNotFoundException, IOException, SecurityException
    {
-      this("Bob", AlgorithmMode.RSA);
-      receivePublicKeyFrom("alice", getPublicKey());
-      receivePublicKeyFrom("eve", getPublicKey());
-      receivePublicKeyFrom("john", getPublicKey());
-      receivePublicKeyFrom("jane", getPublicKey());
+      this("my", AlgorithmMode.RSA);
    }
 
    /**
@@ -183,6 +182,9 @@ public class MainApp extends Application
    {
       this.primaryStage = primaryStage;
       this.primaryStage.setTitle("Crypto Messenger");
+
+      // Set the application icon.
+      this.primaryStage.getIcons().add(new Image("file:resources/images/email_message.png"));
 
       initRootLayout();
 
@@ -639,7 +641,8 @@ public class MainApp extends Application
    }
 
    /**
-    * Removes a known party
+    * Removes a known party by name
+    *
     * @param name
     */
    public void remove(String name)
@@ -648,10 +651,10 @@ public class MainApp extends Application
       secretKeys.values().remove(name);
 
       ListIterator<Party> iter = partyData.listIterator();
-      while(iter.hasNext()){
-          if(iter.next().getIdentifier().compareTo(name) == 0){
-              iter.remove();
-          }
+      while (iter.hasNext()) {
+         if (iter.next().getIdentifier().compareTo(name) == 0) {
+            iter.remove();
+         }
       }
    }
 
@@ -661,6 +664,88 @@ public class MainApp extends Application
    public StringProperty getPublicKeyBase64()
    {
       return publicKeyBase64;
+   }
+
+   /**
+    * Opens a dialog to edit details for the specified party. If the user clicks
+    * OK, the changes are saved into the provided party object and true is
+    * returned.
+    *
+    * @param party
+    *           the party object to be edited
+    * @return true if the user clicked OK, false otherwise.
+    */
+   public boolean showPartyEditDialog(Party party)
+   {
+      try {
+         // Load the fxml file and create a new stage for the popup dialog.
+         FXMLLoader loader = new FXMLLoader();
+         loader.setLocation(MainApp.class.getResource("view/PartyEditDialog.fxml"));
+         AnchorPane page = (AnchorPane) loader.load();
+
+         // Create the dialog Stage.
+         Stage dialogStage = new Stage();
+         dialogStage.setTitle("Edit Party");
+         dialogStage.initModality(Modality.WINDOW_MODAL);
+         dialogStage.initOwner(primaryStage);
+         Scene scene = new Scene(page);
+         dialogStage.setScene(scene);
+
+         // Set the party into the controller.
+         PartyEditDialogController controller = loader.getController();
+         controller.setDialogStage(dialogStage);
+         controller.setParty(party);
+         controller.disableIdentifier();
+
+         // Show the dialog and wait until the user closes it
+         dialogStage.showAndWait();
+
+         return controller.isOkClicked();
+      } catch (IOException e) {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
+   /**
+    * Opens a dialog to edit details for the specified party. If the user clicks
+    * OK, the changes are saved into the provided party object and true is
+    * returned.
+    *
+    * @param party
+    *           the party object to be edited
+    * @return true if the user clicked OK, false otherwise.
+    */
+   public boolean showPartyNewDialog(Party party)
+   {
+      try {
+         // Load the fxml file and create a new stage for the popup dialog.
+         FXMLLoader loader = new FXMLLoader();
+         loader.setLocation(MainApp.class.getResource("view/PartyEditDialog.fxml"));
+         AnchorPane page = (AnchorPane) loader.load();
+
+         // Create the dialog Stage.
+         Stage dialogStage = new Stage();
+         dialogStage.setTitle("Edit Party");
+         dialogStage.initModality(Modality.WINDOW_MODAL);
+         dialogStage.initOwner(primaryStage);
+         Scene scene = new Scene(page);
+         dialogStage.setScene(scene);
+
+         // Set the party into the controller.
+         PartyEditDialogController controller = loader.getController();
+         controller.setDialogStage(dialogStage);
+         controller.setParty(party);
+         controller.enableIdentifier();
+
+         // Show the dialog and wait until the user closes it
+         dialogStage.showAndWait();
+
+         return controller.isOkClicked();
+      } catch (IOException e) {
+         e.printStackTrace();
+         return false;
+      }
    }
 
 }

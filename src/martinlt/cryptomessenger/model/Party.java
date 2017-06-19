@@ -1,9 +1,5 @@
 package martinlt.cryptomessenger.model;
 
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -56,10 +52,20 @@ public class Party
       return publicKey.get();
    }
 
-   @Override
-   public String toString() {
-       return identifier.get();
+   public void setIdentifier(String identifier)
+   {
+      this.identifier.set(identifier);
    }
 
+   public void setPublicKey(String publicKey)
+   {
+      this.publicKey.set(publicKey);
+   }
+
+   @Override
+   public String toString()
+   {
+      return identifier.get();
+   }
 
 }
