@@ -1,4 +1,4 @@
-package uk.co.myeyesonly.model;
+package martinlt.cryptomessenger.model;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;

@@ -1,4 +1,4 @@
-package uk.co.myeyesonly;
+package martinlt.cryptomessenger;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -9,11 +9,10 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-
-import uk.co.myeyesonly.exception.NoSuchPublicKeyException;
-import uk.co.myeyesonly.exception.SecurityException;
-import uk.co.myeyesonly.model.Party;
-import uk.co.myeyesonly.view.PartyOverviewController;
+import martinlt.cryptomessenger.exception.NoSuchPublicKeyException;
+import martinlt.cryptomessenger.exception.SecurityException;
+import martinlt.cryptomessenger.model.Party;
+import martinlt.cryptomessenger.view.PartyOverviewController;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,6 +30,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.ListIterator;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
@@ -121,7 +121,8 @@ public class MainApp extends Application
     * @throws IOException
     * @throws SecurityException
     */
-   public MainApp() throws NoSuchAlgorithmException, ClassNotFoundException, IOException, SecurityException
+   public MainApp()
+         throws NoSuchAlgorithmException, ClassNotFoundException, IOException, SecurityException
    {
       this("Bob", AlgorithmMode.RSA);
       receivePublicKeyFrom("alice", getPublicKey());
@@ -129,6 +130,7 @@ public class MainApp extends Application
       receivePublicKeyFrom("john", getPublicKey());
       receivePublicKeyFrom("jane", getPublicKey());
    }
+
    /**
     * Instantiates a new party instance. This constructor will set the name for
     * this party and will generate a keypair (public/private) specific to the
@@ -176,12 +178,11 @@ public class MainApp extends Application
       publicKeyBase64 = new SimpleStringProperty(encodeBytes(publicKey.getEncoded()));
    }
 
-
    @Override
    public void start(Stage primaryStage)
    {
       this.primaryStage = primaryStage;
-      this.primaryStage.setTitle("My Eyes Only");
+      this.primaryStage.setTitle("Crypto Messenger");
 
       initRootLayout();
 
@@ -233,10 +234,12 @@ public class MainApp extends Application
 
    /**
     * Returns the data as an observable list of Partys.
+    *
     * @return
     */
-   public ObservableList<Party> getPartyData() {
-       return partyData;
+   public ObservableList<Party> getPartyData()
+   {
+      return partyData;
    }
 
    /**
@@ -327,7 +330,7 @@ public class MainApp extends Application
 
    public String getCipherText()
    {
-      if(cipherText.length > 0)
+      if (cipherText.length > 0)
          return encodeBytes(cipherText);
       else
          return "";
@@ -354,8 +357,7 @@ public class MainApp extends Application
     * @throws SecurityException
     *            failed to encrypt and send message
     */
-   public void encryptMessage(final String message, final String recipient)
-         throws SecurityException
+   public void encryptMessage(final String message, final String recipient) throws SecurityException
    {
       // Diffie-Hellman key exchange + AES encryption
       if (ALGORITHM_BASIS.compareTo("DH") == 0) {
@@ -531,7 +533,8 @@ public class MainApp extends Application
     * @throws SecurityException
     *            decryption of message failed
     */
-   public void receiveAndDecryptMessage(final byte[] message, String sender) throws SecurityException
+   public void receiveAndDecryptMessage(final byte[] message, String sender)
+         throws SecurityException
    {
       try {
          SecretKeySpec secretKey = secretKeys.get(sender);
@@ -636,12 +639,28 @@ public class MainApp extends Application
    }
 
    /**
+    * Removes a known party
+    * @param name
+    */
+   public void remove(String name)
+   {
+      receivedPublicKeys.values().remove(name);
+      secretKeys.values().remove(name);
+
+      ListIterator<Party> iter = partyData.listIterator();
+      while(iter.hasNext()){
+          if(iter.next().getIdentifier().compareTo(name) == 0){
+              iter.remove();
+          }
+      }
+   }
+
+   /**
     * @return the publicKeyBase64
     */
    public StringProperty getPublicKeyBase64()
    {
       return publicKeyBase64;
    }
-
 
 }

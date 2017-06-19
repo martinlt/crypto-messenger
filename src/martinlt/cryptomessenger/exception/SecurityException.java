@@ -1,4 +1,4 @@
-package uk.co.myeyesonly.exception;
+package martinlt.cryptomessenger.exception;
 
 public class SecurityException extends Exception
 {

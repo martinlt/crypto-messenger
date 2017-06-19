@@ -1,4 +1,4 @@
-package uk.co.myeyesonly.view;
+package martinlt.cryptomessenger.view;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,8 +7,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import uk.co.myeyesonly.MainApp;
-import uk.co.myeyesonly.model.Party;
+import martinlt.cryptomessenger.MainApp;
+import martinlt.cryptomessenger.model.Party;
 
 public class PartyOverviewController
 {
@@ -98,7 +98,7 @@ public class PartyOverviewController
    {
       final Clipboard clipboard = Clipboard.getSystemClipboard();
       final ClipboardContent content = new ClipboardContent();
-      content.putString(wordWrap(outputLabel.getText(),50));
+      content.putString(wordWrap(outputLabel.getText(), 50));
       clipboard.setContent(content);
    }
 
@@ -114,7 +114,7 @@ public class PartyOverviewController
       Party party = partyComboBox.getSelectionModel().getSelectedItem();
       if (party != null) {
          String message = messageLabel.getText();
-         //System.out.println("DEBUG: " + message);
+         // System.out.println("DEBUG: " + message);
          if (message != null) {
             try {
                mainApp.encryptMessage(message, party.getIdentifier());
@@ -126,6 +126,17 @@ public class PartyOverviewController
 
          }
       }
+   }
+
+   /**
+    * Called when the user clicks on the delete button.
+    */
+   @FXML
+   private void handleDeleteParty()
+   {
+      Party party = partyComboBox.getSelectionModel().getSelectedItem();
+      if(party != null)
+         mainApp.remove(party.getIdentifier());
    }
 
    /**

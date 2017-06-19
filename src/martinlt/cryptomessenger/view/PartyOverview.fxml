@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="uk.co.myeyesonly.view.PartyOverviewController">
+<AnchorPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="martinlt.cryptomessenger.view.PartyOverviewController">
    <children>
       <SplitPane layoutX="200.0" layoutY="98.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -25,7 +25,7 @@
                   <ButtonBar layoutX="232.0" layoutY="10.0" AnchorPane.leftAnchor="232.0" AnchorPane.topAnchor="5.0">
                     <buttons>
                         <Button mnemonicParsing="false" text="Edit..." ButtonBar.buttonData="LEFT" />
-                        <Button mnemonicParsing="false" text="Delete" ButtonBar.buttonData="LEFT" />
+                        <Button mnemonicParsing="false" onAction="#handleDeleteParty" text="Delete" ButtonBar.buttonData="LEFT" />
                       <Button mnemonicParsing="false" text="New..." ButtonBar.buttonData="LEFT" />
                     </buttons>
                   </ButtonBar>
