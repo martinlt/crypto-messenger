@@ -251,7 +251,7 @@ public class PartyOverviewController
       Party selectedParty = partyComboBox.getSelectionModel().getSelectedItem();
       if (selectedParty != null) {
          String currentIdentifier = new String(selectedParty.getIdentifier());
-
+         Party savedParty = new Party(new String(selectedParty.getIdentifier()), new String(selectedParty.getPublicKey()));
          boolean okClicked = mainApp.showPartyEditDialog(selectedParty);
          if (okClicked) {
             try {
@@ -266,6 +266,9 @@ public class PartyOverviewController
                alert.setContentText("The public key you have provided does not appear to be valid.");
 
                alert.showAndWait();
+
+               selectedParty.setIdentifier(savedParty.getIdentifier());
+               selectedParty.setPublicKey(savedParty.getPublicKey());
             }
 
             showPartyDetails(selectedParty);
