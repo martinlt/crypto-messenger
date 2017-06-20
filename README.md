@@ -38,7 +38,7 @@ visible to each other.
   + private key                             + private key
   _ PUBLIC KEY <------------------------->  _ PUBLIC KEY
 ```
-- Alice encrypts message using Bob's public key and sends to Bob
+- Alice generates an temporary AES session key and encrypts it with Bob's public key. Then, Alice encrypts the message with the session key, concatenates both ciphers and sends to Bob
 ```
     O                                        O
    /|\ []-------------------------------->  /|\
@@ -48,9 +48,10 @@ visible to each other.
   + public key                              + public key
   + private key                             + private key
   + public key                              + public key
+  + session key                             _ session key
   + message                                 _ MESSAGE
 ```
-- Bob receives the important message and decrypts with his private key.
+- Bob receives the important message, decrypts the AES session key with his private key then decrypts the message with the session key.
 ```
     O                     (((   (((   (((   \O/   )))
    /|\                                       |
@@ -60,6 +61,7 @@ visible to each other.
   + public key                              + public key
   + private key                             + private key
   + public key                              + public key
+  + session key                             + session key
   + message                                 + message
 ```
 
