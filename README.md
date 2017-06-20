@@ -16,7 +16,6 @@ visible to each other.
   ALICE                                     BOB
 ```
 - Alice and Bob generate a 2048 bit pair of RSA public and private keys.
-
 ```
     O                                        O
    /|\                                      /|\
@@ -27,7 +26,6 @@ visible to each other.
   _ PRIVATE KEY                             _ PRIVATE KEY
 ```
 - Alice and Bob exchange public keys with each other.
-
 ```
     O                                        O
    /|\                                      /|\
