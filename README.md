@@ -5,8 +5,74 @@ mechanisms by way of RSA and Diffie-Hellman/AES algorithms.
 Everything has been written using the standard Java 8 libraries along with JavaFX8 for 
 the user interface.
 
-### Usage Scenario
-  Bob and Alice would like to exchange messages that are confidential and only
+### Usage Scenario 1 : Public Key Encryption (RSA / Asymmetric Encryption)
+Bob and Alice would like to exchange messages that are confidential and only
+visible to them.
+
+1. Bob and Alice would like to exchange messages that are confidential and only
+visible to each other.
+
+```
+    O                                        O
+   /|\                                      /|\
+   / \                                      / \
+
+  ALICE                                     BOB
+```
+2. Alice and Bob generate public and private keys.
+
+```
+    O                                        O
+   /|\                                      /|\
+   / \                                      / \
+
+  ALICE                                     BOB
+  _ PUBLIC KEY                              _ PUBLIC KEY
+  _ PRIVATE KEY                             _ PRIVATE KEY
+```
+3. Alice and Bob exchange public keys with each other.
+
+```
+    O                                        O
+   /|\                                      /|\
+   / \                                      / \
+
+  ALICE                                     BOB
+  + public key                              + public key
+  + private key                             + private key
+  _ PUBLIC KEY <------------------------->  _ PUBLIC KEY
+```
+4. Alice encrypts message using Bob's public key and sends to Bob
+
+
+```
+    O                                        O
+   /|\ []-------------------------------->  /|\
+   / \                                      / \
+
+  ALICE                                     BOB
+  + public key                              + public key
+  + private key                             + private key
+  + public key                              + public key
+  + message                                 _ MESSAGE
+```
+6. Bob receives the important message and decrypts with his private key.
+
+
+```
+    O                     (((   (((   (((   \O/   )))
+   /|\                                       |
+   / \                                      / \
+
+  ALICE                                     BOB
+  + public key                              + public key
+  + private key                             + private key
+  + public key                              + public key
+  + message                                 + message
+```
+
+### Usage Scenario 2 : Symmetric Encryption and Diffie-Hellman Key Exchange
+Again, Bob and Alice would like to exchange messages that are confidential and only
 visible to them.
 
 1. Bob and Alice would like to exchange messages that are confidential and only
