@@ -12,8 +12,7 @@ visible to them.
 1. Bob and Alice would like to exchange messages that are confidential and only
 visible to each other.
 
-  
-    O                                        O
+```    O                                        O
    /|\                                      /|\
    / \                                      / \
 
@@ -21,8 +20,7 @@ visible to each other.
 
 2. Alice and Bob generate public and private keys.
 
-
-      O                                        O
+```    O                                        O
    /|\                                      /|\
    / \                                      / \
 
@@ -32,8 +30,7 @@ visible to each other.
 
 3. Alice and Bob exchange public keys with each other.
 
-
-      O                                        O
+```    O                                        O
    /|\                                      /|\
    / \                                      / \
 
@@ -45,7 +42,7 @@ visible to each other.
 4. Alice generates common secret key via using her private key and Bob's public key. Bob generates common secret key via using his private key and Alice's public key. Both secret keys are equal without TRANSFERRING. This is the magic of Diffie-Helman algorithm.
 
 
-      O                                        O
+```    O                                        O
    /|\                                      /|\
    / \                                      / \
 
@@ -58,7 +55,7 @@ visible to each other.
 5. Alice encrypts message using the secret key and sends to Bob
 
 
-      O                                        O
+```    O                                        O
    /|\ []-------------------------------->  /|\
    / \                                      / \
 
@@ -72,7 +69,7 @@ visible to each other.
 6. Bob receives the important message and decrypts with secret key.
 
 
-      O                     (((   (((   (((   \O/   )))
+```    O                     (((   (((   (((   \O/   )))
    /|\                                       |
    / \                                      / \
 
