@@ -6,9 +6,6 @@ Everything has been written using the standard Java 8 libraries along with JavaF
 the user interface.
 
 ### Usage Scenario 1 : Public Key Encryption (RSA / Asymmetric Encryption)
-Bob and Alice would like to exchange messages that are confidential and only
-visible to them.
-
 - Bob and Alice would like to exchange messages that are confidential and only
 visible to each other.
 ```
@@ -67,11 +64,8 @@ visible to each other.
 ```
 
 ### Usage Scenario 2 : Symmetric Encryption and Diffie-Hellman Key Exchange
-Again, Bob and Alice would like to exchange messages that are confidential and only
+- Again, Bob and Alice would like to exchange messages that are confidential and only
 visible to them.
-
-- Bob and Alice would like to exchange messages that are confidential and only
-visible to each other.
 ```
     O                                        O
    /|\                                      /|\
