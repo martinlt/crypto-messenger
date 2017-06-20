@@ -5,6 +5,9 @@ mechanisms by way of RSA and Diffie-Hellman/AES algorithms.
 Everything has been written using the standard Java 8 libraries along with JavaFX8 for 
 the user interface.
 
+Follow this link to download a ready-compiled Windows bundle of this application:
+[Crypto Messenger-1.0.exe](/build/deploy/bundles/Crypto Messenger-1.0.exe)
+
 ### Usage Scenario 1 : Public Key Encryption (RSA / Asymmetric Encryption)
 - Bob and Alice would like to exchange messages that are confidential and only
 visible to each other.
