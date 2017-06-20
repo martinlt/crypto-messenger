@@ -15,7 +15,7 @@ visible to each other.
 
   ALICE                                     BOB
 ```
-- Alice and Bob generate public and private keys.
+- Alice and Bob generate a 2048 bit pair of RSA public and private keys.
 
 ```
     O                                        O
@@ -73,7 +73,7 @@ visible to them.
 
   ALICE                                     BOB
 ```
-- Alice and Bob generate public and private keys.
+- Alice and Bob generate a 2048 bit pair of Diffie-Hellman public and private keys.
 ```
     O                                        O
    /|\                                      /|\
