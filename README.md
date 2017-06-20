@@ -122,7 +122,7 @@ visible to each other.
   + public key                              + public key
   _ SECRET KEY                              _ SECRET KEY
 ```
-5. Alice encrypts message using the secret key and sends to Bob
+5. Alice encrypts message by using the secret key and applying the AES/CBC encryption algorithm, then sends to Bob.
 
 
 ```
