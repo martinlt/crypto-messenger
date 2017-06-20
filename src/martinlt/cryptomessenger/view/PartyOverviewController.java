@@ -123,7 +123,8 @@ public class PartyOverviewController
                mainApp.encryptMessage(message, party.getIdentifier());
 
                outputLabel.setText(mainApp.getCipherText());
-            } catch (Exception ex) {
+            } catch (Exception e) {
+               e.printStackTrace();
                Alert alert = new Alert(AlertType.ERROR);
                alert.initOwner(mainApp.getPrimaryStage());
                alert.setTitle("An error occurred");
@@ -164,7 +165,10 @@ public class PartyOverviewController
 
          if ((message != null) && (message.compareTo("") != 0)) {
             try {
-               mainApp.receiveAndDecryptMessage(Base64.getDecoder().decode(message));
+               if(mainApp.getAlgorithmBasis().compareTo("RSA") == 0)
+                  mainApp.receiveAndDecryptMessage(Base64.getDecoder().decode(message));
+               else
+                  mainApp.receiveAndDecryptMessage(Base64.getDecoder().decode(message), party.getIdentifier());
 
                outputLabel.setText(mainApp.getPlainText());
             } catch (Exception ex) {

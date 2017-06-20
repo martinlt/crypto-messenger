@@ -42,6 +42,8 @@ import java.util.prefs.Preferences;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.JAXBContext;
@@ -108,7 +110,12 @@ public class MainApp extends Application
    /**
     * The basis used for key generation and encryption
     */
-   private final String ALGORITHM_BASIS;
+   private final String algorithmBasis;
+
+   public String getAlgorithmBasis()
+   {
+      return algorithmBasis;
+   }
 
    /**
     * Used to determine how keys are generated and which algorithm is used for
@@ -135,7 +142,7 @@ public class MainApp extends Application
    public MainApp()
          throws NoSuchAlgorithmException, ClassNotFoundException, IOException, SecurityException
    {
-      this("my", AlgorithmMode.RSA);
+      this("my", AlgorithmMode.DH_AES);
    }
 
    /**
@@ -158,13 +165,13 @@ public class MainApp extends Application
       this.name = name;
 
       if (AlgorithmMode.RSA == mode) {
-         ALGORITHM_BASIS = "RSA";
+         algorithmBasis = "RSA";
       } else {
-         ALGORITHM_BASIS = "DH";
+         algorithmBasis = "DH";
       }
 
-      this.PRIVATE_KEY_FILE = "private_" + name + "_" + ALGORITHM_BASIS + ".key";
-      this.PUBLIC_KEY_FILE = "public_" + name + "_" + ALGORITHM_BASIS + ".key";
+      this.PRIVATE_KEY_FILE = "private_" + name + "_" + algorithmBasis + ".key";
+      this.PUBLIC_KEY_FILE = "public_" + name + "_" + algorithmBasis + ".key";
 
       if (!areKeysPresent()) {
          generateKeyPair();
@@ -289,7 +296,7 @@ public class MainApp extends Application
     */
    private void generateKeyPair() throws NoSuchAlgorithmException, IOException
    {
-      final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM_BASIS);
+      final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithmBasis);
       keyGen.initialize(KEY_SIZE);
       final KeyPair keyPair = keyGen.generateKeyPair();
 
@@ -382,7 +389,7 @@ public class MainApp extends Application
    public void encryptMessage(final String message, final String recipient) throws SecurityException
    {
       // Diffie-Hellman key exchange + AES encryption
-      if (ALGORITHM_BASIS.compareTo("DH") == 0) {
+      if (algorithmBasis.compareTo("DH") == 0) {
          SecretKeySpec secretKey = secretKeys.get(recipient);
          if (secretKey == null)
             throw new NoSuchPublicKeyException(recipient);
@@ -447,13 +454,35 @@ public class MainApp extends Application
    private byte[] encrypt(String plainText, PublicKey publicKey) throws SecurityException
    {
       try {
-         // Encrypt the plaintext
+         // generate a random 256 bit AES key
+         KeyGenerator kgen = KeyGenerator.getInstance("AES");
+         kgen.init(128);
+         SecretKey key = kgen.generateKey();
+         byte[] aesKey = key.getEncoded();
+         SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
+
+         // Encrypt the AES key with the other parties public RSA key
          Cipher cipher = Cipher.getInstance("RSA");
          cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-         byte[] cipherText = cipher.doFinal(plainText.getBytes());
+         byte[] cipherKey = cipher.doFinal(aesKey);
+
+         System.out.println("DEBUG: cipher key length = " + cipherKey.length);
+
+         // Now use AES encryption to generate the cipherText
+         byte[] encryptedText = encrypt(plainText, aeskeySpec);
+
+         System.out.println("DEBUG: encrypted text length = " + encryptedText.length);
+
+         // Combine secret key and encrypted part to form the ciphertext
+         byte[] cipherText = new byte[cipherKey.length + encryptedText.length];
+         System.arraycopy(cipherKey, 0, cipherText, 0, cipherKey.length);
+         System.arraycopy(encryptedText, 0, cipherText, cipherKey.length, encryptedText.length);
+
+         System.out.println("DEBUG: cipher text length = " + cipherText.length);
 
          return cipherText;
       } catch (Exception e) {
+         e.printStackTrace();
          throw new SecurityException("Encryption failed : ", e);
       }
    }
@@ -505,13 +534,30 @@ public class MainApp extends Application
    private String decrypt(byte[] cipherText) throws SecurityException
    {
       try {
-         // Decrypt
+         System.out.println("DEBUG: cipher text length = " + cipherText.length);
+
+         // Extract the cipher key from the ciphertext
+         byte[] cipherKey = new byte[256];
+         System.arraycopy(cipherText, 0, cipherKey, 0, cipherKey.length);
+
+         System.out.println("DEBUG: cipher key length = " + cipherKey.length);
+
+         // Decrypt the cipher key using my private key
          final Cipher cipherDecrypt = Cipher.getInstance("RSA");
          cipherDecrypt.init(Cipher.DECRYPT_MODE, privateKey);
-         byte[] plainText = cipherDecrypt.doFinal(cipherText);
+         byte[] aesKey = cipherDecrypt.doFinal(cipherKey);
+         SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
 
-         return new String(plainText);
+         // Extract encrypted portion.
+         int encryptedSize = cipherText.length - cipherKey.length;
+         byte[] encryptedBytes = new byte[encryptedSize];
+         System.arraycopy(cipherText, cipherKey.length, encryptedBytes, 0, encryptedSize);
+
+         System.out.println("DEBUG: encrypted text length = " + encryptedBytes.length);
+
+         return decrypt(encryptedBytes, aeskeySpec);
       } catch (Exception e) {
+         e.printStackTrace();
          throw new SecurityException("Decryption failed : ", e);
       }
    }
@@ -630,7 +676,7 @@ public class MainApp extends Application
          byte[] byteKey = Base64.getDecoder().decode(publicKey);
 
          X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
-         KeyFactory kf = KeyFactory.getInstance(ALGORITHM_BASIS);
+         KeyFactory kf = KeyFactory.getInstance(algorithmBasis);
 
          PublicKey receivedPublicKey = kf.generatePublic(X509publicKey);
 
@@ -640,10 +686,10 @@ public class MainApp extends Application
          partyData.add(new Party(senderName, publicKey));
 
          // generate the shared secret for Diffie-Hellman
-         if (ALGORITHM_BASIS.compareTo("DH") == 0) {
+         if (algorithmBasis.compareTo("DH") == 0) {
             // generate and hash the shared secret key using my private key
             // and the senders public key
-            final KeyAgreement keyAgreement = KeyAgreement.getInstance(ALGORITHM_BASIS);
+            final KeyAgreement keyAgreement = KeyAgreement.getInstance(algorithmBasis);
             keyAgreement.init(privateKey);
 
             keyAgreement.doPhase(receivedPublicKey, true);
