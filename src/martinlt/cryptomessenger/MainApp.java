@@ -65,8 +65,14 @@ public class MainApp extends Application
       RSA, DH_AES
    }
 
+   /**
+    * The size (in bits) of the keys
+    */
    private static final int KEY_SIZE = 2048;
 
+   /**
+    * The size (in bits) of the initialisation vector used
+    */
    private static final int IV_SIZE = 16;
 
    public static void main(String[] args)
@@ -96,6 +102,9 @@ public class MainApp extends Application
     */
    private final PublicKey publicKey;
 
+   /**
+    * Base 64 representation of this party's public key.
+    */
    private final StringProperty publicKeyBase64;
 
    /**
@@ -124,8 +133,9 @@ public class MainApp extends Application
     * A plaintext string decrypted from an encrypted message.
     */
    private byte[] cipherText;
+
    /**
-    * The basis used for key generation and encryption
+    * The basis used for key generation and key exchange
     */
    private final String algorithmBasis;
 
@@ -232,11 +242,20 @@ public class MainApp extends Application
       }
    }
 
+   /**
+    * Returns the key exchange pattern currently in use (RSA or DH)
+    * @return
+    */
    public String getAlgorithmBasis()
    {
       return algorithmBasis;
    }
 
+   /**
+    * Returns a Base64 encoded version of the ciphertext.
+    *
+    * @return
+    */
    public String getCipherText()
    {
       if (cipherText.length > 0)
@@ -728,7 +747,7 @@ public class MainApp extends Application
    {
       try {
          // Extract the cipher key from the ciphertext
-         byte[] cipherKey = new byte[256];
+         byte[] cipherKey = new byte[KEY_SIZE / 8];
          System.arraycopy(cipherText, 0, cipherKey, 0, cipherKey.length);
 
          // Decrypt the cipher key using my private key
