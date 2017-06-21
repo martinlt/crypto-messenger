@@ -7,7 +7,11 @@ the user interface.
 	
 Follow this [link](https://github.com/martinlt/crypto-messenger/releases/download/v1.1/Crypto.Messenger-1.1.exe) to download a ready-compiled Windows installer version of this application.
 
-### Usage Scenario 1 : Public Key Encryption (RSA / Asymmetric Encryption)
+### Encryption pattern 1
+In this pattern, the RSA public key of the receiving party is used to encrypt a temporary session key. The session key is used to encrypt the message using AES encryption. Both the encrypted session key and the encrypted message are sent to the receiving party as one ciphertext. Only the receiving party can decrypt the session key (using their RSA private key) and therefore decrypt the message (using AES).
+
+This pattern can be classified as "Symmetric message encryption using public key encryption for key exchange" and a scenario is provided below::
+
 - Bob and Alice would like to exchange messages that are confidential and only
 visible to each other.
 ```
@@ -65,7 +69,11 @@ visible to each other.
   + message                                 + message
 ```
 
-### Usage Scenario 2 : Symmetric Encryption and Diffie-Hellman Key Exchange
+### Encryption pattern 2
+In this pattern, both parties generate Diffie-Hellman public/private keypairs and exchange the public key. The combination of the private key and the other party's public key are then used to generate a shared secret key. This shared secret key can then be used by both parties to encrypt/decrypt messages using AES without ever having to be sent across the wire.
+
+This pattern can be classified as "Symmetric message encryption using Diffie-Hellman key exchange" and a scenario is provided below:
+
 - Again, Bob and Alice would like to exchange messages that are confidential and only
 visible to them.
 ```
