@@ -26,8 +26,6 @@ public class PartyEditDialogController
    private Party party;
    private boolean okClicked = false;
 
-   private static final String NEWLINE = "\n";
-
    /**
     * Initializes the controller class. This method is automatically called
     * after the fxml file has been loaded.
@@ -57,8 +55,7 @@ public class PartyEditDialogController
       this.party = party;
 
       identifierField.setText(party.getIdentifier());
-      publicKeyField.setText(PartyOverviewController.wordWrap(party.getPublicKey(), 80));
-
+      publicKeyField.setText(party.getPublicKey());
    }
 
    /**
@@ -79,7 +76,8 @@ public class PartyEditDialogController
    {
       if (isInputValid()) {
          party.setIdentifier(identifierField.getText());
-         party.setPublicKey(publicKeyField.getText().replace(NEWLINE, ""));
+         // party.setPublicKey(publicKeyField.getText().replace(NEWLINE, ""));
+         party.setPublicKey(publicKeyField.getText());
 
          okClicked = true;
          dialogStage.close();

@@ -26,6 +26,9 @@ public class PartyOverviewController
    private Label outputLabel;
 
    @FXML
+   private Label outputLabelPrompt;
+
+   @FXML
    private TextArea messageLabel;
 
    // Reference to the main application.
@@ -102,7 +105,7 @@ public class PartyOverviewController
    {
       final Clipboard clipboard = Clipboard.getSystemClipboard();
       final ClipboardContent content = new ClipboardContent();
-      content.putString(wordWrap(outputLabel.getText(), 80));
+      content.putString(outputLabel.getText());
       clipboard.setContent(content);
    }
 
@@ -110,6 +113,7 @@ public class PartyOverviewController
    private void handleShowMyPublicKey()
    {
       outputLabel.setText(mainApp.getPublicKey());
+      outputLabelPrompt.setText("My Public Key:");
    }
 
    @FXML
@@ -123,6 +127,7 @@ public class PartyOverviewController
                mainApp.encryptMessage(message, party.getIdentifier());
 
                outputLabel.setText(mainApp.getCipherText());
+               outputLabelPrompt.setText("Ciphertext:");
             } catch (Exception e) {
                e.printStackTrace();
                Alert alert = new Alert(AlertType.ERROR);
@@ -171,6 +176,7 @@ public class PartyOverviewController
                   mainApp.receiveAndDecryptMessage(Base64.getDecoder().decode(message), party.getIdentifier());
 
                outputLabel.setText(mainApp.getPlainText());
+               outputLabelPrompt.setText("Plaintext:");
             } catch (Exception ex) {
                Alert alert = new Alert(AlertType.ERROR);
                alert.initOwner(mainApp.getPrimaryStage());
@@ -211,46 +217,6 @@ public class PartyOverviewController
       Party party = partyComboBox.getSelectionModel().getSelectedItem();
       if (party != null)
          mainApp.remove(party.getIdentifier());
-   }
-
-   /**
-    * Performs word wrapping. Returns the input string with long lines of text
-    * cut (between words) for readability.
-    *
-    * @param in
-    *           text to be word-wrapped
-    * @param length
-    *           number of characters in a line
-    */
-   public static String wordWrap(String in, int length)
-   {
-      if (in == null)
-         return "";
-
-      // :: Trim
-      while (in.length() > 0 && (in.charAt(0) == '\t' || in.charAt(0) == ' '))
-         in = in.substring(1);
-
-      // :: If Small Enough Already, Return Original
-      if (in.length() < length)
-         return in;
-
-      // :: If Next length Contains Newline, Split There
-      if (in.substring(0, length).contains(NEWLINE))
-         return in.substring(0, in.indexOf(NEWLINE)).trim() + NEWLINE
-               + wordWrap(in.substring(in.indexOf("\n") + 1), length);
-
-      // :: Otherwise, Split Along Nearest Previous Space/Tab/Dash
-      int spaceIndex = Math.max(Math.max(in.lastIndexOf(" ", length), in.lastIndexOf("\t", length)),
-            in.lastIndexOf("-", length));
-
-      // :: If No Nearest Space, Split At length
-      if (spaceIndex == -1)
-         spaceIndex = length;
-
-      // :: Split
-      return in.substring(0, spaceIndex).trim() + NEWLINE
-            + wordWrap(in.substring(spaceIndex), length);
    }
 
    /**

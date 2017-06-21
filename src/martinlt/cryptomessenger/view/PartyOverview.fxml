@@ -17,7 +17,7 @@
                <children>
                   <ComboBox fx:id="partyComboBox" layoutX="14.0" layoutY="14.0" onAction="#handleComboBoxAction" prefHeight="25.0" prefWidth="219.0" promptText="Select party..." AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0" />
                   <Label layoutX="5.0" layoutY="30.0" text="Public Key:" />
-                  <Label fx:id="publicKeyLabel" alignment="TOP_LEFT" layoutX="5.0" layoutY="35.0" prefHeight="100.0" prefWidth="688.0" style="-fx-background-color: DAE6F3;" text="Label" wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="50.0">
+                  <Label fx:id="publicKeyLabel" alignment="TOP_LEFT" layoutX="5.0" layoutY="35.0" prefHeight="150.0" prefWidth="688.0" style="-fx-background-color: DAE6F3;" text="Label" wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="50.0">
                      <font>
                         <Font name="Courier New" size="12.0" />
                      </font>
@@ -29,25 +29,25 @@
                       <Button mnemonicParsing="false" onAction="#handleNewParty" text="New..." ButtonBar.buttonData="LEFT" />
                     </buttons>
                   </ButtonBar>
-                  <Label layoutY="157.0" text="Message:" AnchorPane.leftAnchor="5.0" />
-                  <TextArea fx:id="messageLabel" layoutX="4.0" layoutY="178.0" prefHeight="150.0" prefWidth="688.0" promptText="Enter message to encrypt/decrypt..." wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
+                  <Label layoutX="5.0" layoutY="207.0" text="Message:" AnchorPane.leftAnchor="5.0" />
+                  <TextArea fx:id="messageLabel" layoutX="5.0" layoutY="228.0" prefHeight="150.0" prefWidth="688.0" promptText="Enter message to encrypt/decrypt..." wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
                      <font>
                         <Font name="Courier New" size="12.0" />
                      </font></TextArea>
-                  <ButtonBar buttonMinWidth="125.0" layoutX="15.0" layoutY="338.0" AnchorPane.leftAnchor="5.0">
+                  <ButtonBar buttonMinWidth="125.0" layoutX="5.0" layoutY="388.0" AnchorPane.leftAnchor="5.0">
                     <buttons>
                       <Button mnemonicParsing="false" onAction="#handleEncrypt" text="Encrypt" ButtonBar.buttonData="LEFT" />
                         <Button mnemonicParsing="false" onAction="#handleDecrypt" text="Decrypt" ButtonBar.buttonData="LEFT" />
                         <Button mnemonicParsing="false" onAction="#handleShowMyPublicKey" text="Show My Public Key" ButtonBar.buttonData="LEFT" />
                     </buttons>
                   </ButtonBar>
-                  <ButtonBar layoutX="561.0" layoutY="338.0" AnchorPane.rightAnchor="5.0">
+                  <ButtonBar layoutX="570.0" layoutY="388.0" AnchorPane.rightAnchor="5.0">
                     <buttons>
                       <Button mnemonicParsing="false" onAction="#handleCopyToClipboard" text="Copy to Clipboard" ButtonBar.buttonData="RIGHT" />
                     </buttons>
                   </ButtonBar>
-                  <Label layoutX="5.0" layoutY="373.0" text="Output:" />
-                  <Label fx:id="outputLabel" alignment="TOP_LEFT" layoutX="12.0" layoutY="391.0" prefHeight="200.0" prefWidth="688.0" style="-fx-background-color: DAE6F3;" wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
+                  <Label fx:id="outputLabelPrompt" layoutX="5.0" layoutY="423.0" text="Output:" />
+                  <Label fx:id="outputLabel" alignment="TOP_LEFT" layoutX="5.0" layoutY="441.0" prefHeight="150.0" prefWidth="688.0" style="-fx-background-color: DAE6F3;" wrapText="true" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
                      <font>
                         <Font name="Courier New" size="12.0" />
                      </font>

@@ -329,7 +329,19 @@ public class MainApp extends Application
     */
    public String getPublicKey()
    {
-      return encodeBytes(publicKey.getEncoded());
+      // return encodeBytes(publicKey.getEncoded());
+      return getKeyFormattedAsPEM(this.publicKey);
+   }
+
+   private String getKeyFormattedAsPEM(PublicKey key)
+   {
+      // Base 64 encode the key
+      String base64Key = Base64.getEncoder().encodeToString(key.getEncoded());
+
+      // Return in PEM format
+      return "-----BEGIN PUBLIC KEY-----\n" +
+            base64Key.replaceAll("(.{64})", "$1\n") +
+            "\n-----END PUBLIC KEY-----\n";
    }
 
    /**
@@ -491,7 +503,9 @@ public class MainApp extends Application
          throws SecurityException
    {
       try {
-         byte[] byteKey = Base64.getDecoder().decode(publicKey);
+         String unwrappedPEM = publicKey.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replace("\n","");
+
+         byte[] byteKey = Base64.getDecoder().decode(unwrappedPEM);
 
          X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
          KeyFactory kf = KeyFactory.getInstance(algorithmBasis);
