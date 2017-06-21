@@ -112,7 +112,7 @@ public class RootLayoutController
       Alert alert = new Alert(AlertType.INFORMATION);
       alert.setTitle("Crypto Messenger");
       alert.setHeaderText("About");
-      alert.setContentText("Author: Martin Thomas\nWebsite: http://www.agile-architect.co.uk/crypto-messenger");
+      alert.setContentText("Author: Martin Thomas\n\nWebsite: http://www.agile-architect.co.uk/crypto-messenger");
 
       alert.showAndWait();
    }

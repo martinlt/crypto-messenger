@@ -91,7 +91,7 @@
 		<fx:application id="fxApplication"
 			name="Crypto Messenger"
 			mainClass="martinlt.cryptomessenger.MainApp"
-			version="1.0"
+			version="1.1"
 		/>
 
 		<mkdir dir="build/classes/META-INF" />
