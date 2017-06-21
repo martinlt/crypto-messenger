@@ -57,6 +57,23 @@ import javafx.collections.ObservableList;
 
 public class MainApp extends Application
 {
+   /**
+    * Used to determine how keys are generated and which algorithm is used for
+    * encryption.
+    */
+   public static enum AlgorithmMode {
+      RSA, DH_AES
+   }
+
+   private static final int KEY_SIZE = 2048;
+
+   private static final int IV_SIZE = 16;
+
+   public static void main(String[] args)
+   {
+      launch(args);
+   }
+
    // JavaFX variables
    private Stage primaryStage;
    private BorderPane rootLayout;
@@ -78,6 +95,7 @@ public class MainApp extends Application
     * See the {@link #receivePublicKeyFrom(String, String)} method.
     */
    private final PublicKey publicKey;
+
    private final StringProperty publicKeyBase64;
 
    /**
@@ -100,33 +118,16 @@ public class MainApp extends Application
    /**
     * A plaintext string decrypted from an encrypted message.
     */
-   private String plainText;
+   private String plainText;;
 
    /**
     * A plaintext string decrypted from an encrypted message.
     */
    private byte[] cipherText;
-
    /**
     * The basis used for key generation and encryption
     */
    private final String algorithmBasis;
-
-   public String getAlgorithmBasis()
-   {
-      return algorithmBasis;
-   }
-
-   /**
-    * Used to determine how keys are generated and which algorithm is used for
-    * encryption.
-    */
-   public static enum AlgorithmMode {
-      RSA, DH_AES
-   };
-
-   private static final int KEY_SIZE = 2048;
-   private static final int IV_SIZE = 16;
 
    private final String PRIVATE_KEY_FILE;
    private final String PUBLIC_KEY_FILE;
@@ -142,7 +143,7 @@ public class MainApp extends Application
    public MainApp()
          throws NoSuchAlgorithmException, ClassNotFoundException, IOException, SecurityException
    {
-      this("my", AlgorithmMode.DH_AES);
+      this("my", AlgorithmMode.RSA);
    }
 
    /**
@@ -192,179 +193,6 @@ public class MainApp extends Application
       publicKeyBase64 = new SimpleStringProperty(encodeBytes(publicKey.getEncoded()));
    }
 
-   @Override
-   public void start(Stage primaryStage)
-   {
-      this.primaryStage = primaryStage;
-      this.primaryStage.setTitle("Crypto Messenger");
-
-      // Set the application icon.
-      this.primaryStage.getIcons().add(new Image("file:resources/images/email_message.png"));
-
-      initRootLayout();
-
-      showPartyOverview();
-   }
-
-   /**
-    * Initializes the root layout and tries to load the last opened
-    * party file.
-    */
-   public void initRootLayout() {
-       try {
-           // Load root layout from fxml file.
-           FXMLLoader loader = new FXMLLoader();
-           loader.setLocation(MainApp.class
-                   .getResource("view/RootLayout.fxml"));
-           rootLayout = (BorderPane) loader.load();
-
-           // Show the scene containing the root layout.
-           Scene scene = new Scene(rootLayout);
-           primaryStage.setScene(scene);
-
-           // Give the controller access to the main app.
-           RootLayoutController controller = loader.getController();
-           controller.setMainApp(this);
-
-           primaryStage.show();
-       } catch (IOException e) {
-           e.printStackTrace();
-       }
-
-       // Try to load last opened party file.
-       File file = getPartyFilePath();
-       if (file != null) {
-           loadPartyDataFromFile(file);
-       }
-   }
-
-   /**
-    * Shows the party overview inside the root layout.
-    */
-   public void showPartyOverview()
-   {
-      try {
-         // Load party overview.
-         FXMLLoader loader = new FXMLLoader();
-         loader.setLocation(MainApp.class.getResource("view/PartyOverview.fxml"));
-         AnchorPane partyOverview = (AnchorPane) loader.load();
-
-         // Set party overview into the center of root layout.
-         rootLayout.setCenter(partyOverview);
-
-         // Give the controller access to the main app.
-         PartyOverviewController controller = loader.getController();
-         controller.setMainApp(this);
-
-      } catch (IOException e) {
-         e.printStackTrace();
-      }
-   }
-
-   /**
-    * Returns the data as an observable list of Partys.
-    *
-    * @return
-    */
-   public ObservableList<Party> getPartyData()
-   {
-      return partyData;
-   }
-
-   /**
-    * Returns the main stage.
-    *
-    * @return
-    */
-   public Stage getPrimaryStage()
-   {
-      return primaryStage;
-   }
-
-   public static void main(String[] args)
-   {
-      launch(args);
-   }
-
-   /**
-    * Generate key which contains a pair of private and public key. Store the
-    * set of keys in files.
-    *
-    * @throws NoSuchAlgorithmException
-    * @throws IOException
-    * @throws FileNotFoundException
-    */
-   private void generateKeyPair() throws NoSuchAlgorithmException, IOException
-   {
-      final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithmBasis);
-      keyGen.initialize(KEY_SIZE);
-      final KeyPair keyPair = keyGen.generateKeyPair();
-
-      File privateKeyFile = new File(PRIVATE_KEY_FILE);
-      File publicKeyFile = new File(PUBLIC_KEY_FILE);
-
-      // Create files to store public and private key
-      if (privateKeyFile.getParentFile() != null) {
-         privateKeyFile.getParentFile().mkdirs();
-      }
-      privateKeyFile.createNewFile();
-
-      if (publicKeyFile.getParentFile() != null) {
-         publicKeyFile.getParentFile().mkdirs();
-      }
-      publicKeyFile.createNewFile();
-
-      // Saving the Public key in a file
-      ObjectOutputStream publicKeyOS = new ObjectOutputStream(new FileOutputStream(publicKeyFile));
-      publicKeyOS.writeObject(keyPair.getPublic());
-      publicKeyOS.close();
-
-      // Saving the Private key in a file
-      ObjectOutputStream privateKeyOS = new ObjectOutputStream(
-            new FileOutputStream(privateKeyFile));
-      privateKeyOS.writeObject(keyPair.getPrivate());
-      privateKeyOS.close();
-
-   }
-
-   /**
-    * The method checks if the pair of public and private key has already been
-    * generated.
-    *
-    * @return flag indicating if the pair of keys were generated.
-    */
-   private boolean areKeysPresent()
-   {
-
-      File privateKey = new File(PRIVATE_KEY_FILE);
-      File publicKey = new File(PUBLIC_KEY_FILE);
-
-      if (privateKey.exists() && publicKey.exists()) {
-         return true;
-      }
-      return false;
-   }
-
-   /**
-    * A helper method to Base64 a byte array.
-    *
-    * @param bytes
-    *           an array of bytes to be encoded.
-    * @return Base64 encoded string representation of the bytes.
-    */
-   private String encodeBytes(final byte[] bytes)
-   {
-      return Base64.getEncoder().encodeToString(bytes);
-   }
-
-   public String getCipherText()
-   {
-      if (cipherText.length > 0)
-         return encodeBytes(cipherText);
-      else
-         return "";
-   }
-
    /**
     * Encrypt a message and send to a known party.
     * <p>
@@ -404,162 +232,17 @@ public class MainApp extends Application
       }
    }
 
-   /**
-    * Generate ciphertext using AES/CBC/PKCS5Padding
-    *
-    * @param plainText
-    *           the plain text message
-    * @param secretKeySpec
-    *           key to be used to encrypt the message
-    * @return the ciphertext generated
-    * @throws SecurityException
-    *            if the encryption could not be completed
-    */
-   private byte[] encrypt(String plainText, SecretKeySpec secretKeySpec) throws SecurityException
+   public String getAlgorithmBasis()
    {
-      try {
-         // Generate the IV.
-         byte[] iv = new byte[IV_SIZE];
-         SecureRandom random = new SecureRandom();
-         random.nextBytes(iv);
-         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
-
-         // Encrypt the plaintext
-         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
-         byte[] encryptedText = cipher.doFinal(plainText.getBytes());
-
-         // Combine IV and encrypted part to form the ciphertext
-         byte[] cipherText = new byte[IV_SIZE + encryptedText.length];
-         System.arraycopy(iv, 0, cipherText, 0, IV_SIZE);
-         System.arraycopy(encryptedText, 0, cipherText, IV_SIZE, encryptedText.length);
-
-         return cipherText;
-      } catch (Exception e) {
-         throw new SecurityException("Encryption failed : ", e);
-      }
+      return algorithmBasis;
    }
 
-   /**
-    * Generate ciphertext using RSA encryption
-    *
-    * @param plainText
-    *           the plain text message
-    * @param publicKey
-    *           the RSA public key to be used to encrypt the message
-    * @return the ciphertext generated
-    * @throws SecurityException
-    *            if the encryption could not be completed
-    */
-   private byte[] encrypt(String plainText, PublicKey publicKey) throws SecurityException
+   public String getCipherText()
    {
-      try {
-         // generate a random 256 bit AES key
-         KeyGenerator kgen = KeyGenerator.getInstance("AES");
-         kgen.init(128);
-         SecretKey key = kgen.generateKey();
-         byte[] aesKey = key.getEncoded();
-         SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
-
-         // Encrypt the AES key with the other parties public RSA key
-         Cipher cipher = Cipher.getInstance("RSA");
-         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-         byte[] cipherKey = cipher.doFinal(aesKey);
-
-         System.out.println("DEBUG: cipher key length = " + cipherKey.length);
-
-         // Now use AES encryption to generate the cipherText
-         byte[] encryptedText = encrypt(plainText, aeskeySpec);
-
-         System.out.println("DEBUG: encrypted text length = " + encryptedText.length);
-
-         // Combine secret key and encrypted part to form the ciphertext
-         byte[] cipherText = new byte[cipherKey.length + encryptedText.length];
-         System.arraycopy(cipherKey, 0, cipherText, 0, cipherKey.length);
-         System.arraycopy(encryptedText, 0, cipherText, cipherKey.length, encryptedText.length);
-
-         System.out.println("DEBUG: cipher text length = " + cipherText.length);
-
-         return cipherText;
-      } catch (Exception e) {
-         e.printStackTrace();
-         throw new SecurityException("Encryption failed : ", e);
-      }
-   }
-
-   /**
-    * Decipher text encrypted using AES/CBC/PKCS5Padding
-    *
-    * @param cipherText
-    *           the encrypted message
-    * @param secretKeySpec
-    *           key used to encrypt the message
-    * @return the decrypted message
-    * @throws SecurityException
-    *            if the decryption could not be completed
-    */
-   private String decrypt(byte[] cipherText, SecretKeySpec secretKeySpec) throws SecurityException
-   {
-      try {
-         // Extract the IV from the ciphertext
-         byte[] iv = new byte[IV_SIZE];
-         System.arraycopy(cipherText, 0, iv, 0, iv.length);
-         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
-
-         // Extract encrypted portion.
-         int encryptedSize = cipherText.length - IV_SIZE;
-         byte[] encryptedBytes = new byte[encryptedSize];
-         System.arraycopy(cipherText, IV_SIZE, encryptedBytes, 0, encryptedSize);
-
-         // Decrypt
-         final Cipher cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
-         cipherDecrypt.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
-         byte[] plainText = cipherDecrypt.doFinal(encryptedBytes);
-
-         return new String(plainText);
-      } catch (Exception e) {
-         throw new SecurityException("Decryption failed : ", e);
-      }
-   }
-
-   /**
-    * Decipher text encrypted using RSA
-    *
-    * @param cipherText
-    *           the encrypted message
-    * @return the decrypted message
-    * @throws SecurityException
-    *            if the decryption could not be completed
-    */
-   private String decrypt(byte[] cipherText) throws SecurityException
-   {
-      try {
-         System.out.println("DEBUG: cipher text length = " + cipherText.length);
-
-         // Extract the cipher key from the ciphertext
-         byte[] cipherKey = new byte[256];
-         System.arraycopy(cipherText, 0, cipherKey, 0, cipherKey.length);
-
-         System.out.println("DEBUG: cipher key length = " + cipherKey.length);
-
-         // Decrypt the cipher key using my private key
-         final Cipher cipherDecrypt = Cipher.getInstance("RSA");
-         cipherDecrypt.init(Cipher.DECRYPT_MODE, privateKey);
-         byte[] aesKey = cipherDecrypt.doFinal(cipherKey);
-         SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
-
-         // Extract encrypted portion.
-         int encryptedSize = cipherText.length - cipherKey.length;
-         byte[] encryptedBytes = new byte[encryptedSize];
-         System.arraycopy(cipherText, cipherKey.length, encryptedBytes, 0, encryptedSize);
-
-         System.out.println("DEBUG: encrypted text length = " + encryptedBytes.length);
-
-         return decrypt(encryptedBytes, aeskeySpec);
-      } catch (Exception e) {
-         e.printStackTrace();
-         throw new SecurityException("Decryption failed : ", e);
-      }
+      if (cipherText.length > 0)
+         return encodeBytes(cipherText);
+      else
+         return "";
    }
 
    /**
@@ -573,6 +256,54 @@ public class MainApp extends Application
    }
 
    /**
+    * Returns the data as an observable list of Partys.
+    *
+    * @return
+    */
+   public ObservableList<Party> getPartyData()
+   {
+      return partyData;
+   }
+
+   /**
+    * Returns the party file preference, i.e. the file that was last opened. The
+    * preference is read from the OS specific registry. If no such preference
+    * can be found, null is returned.
+    *
+    * @return
+    */
+   public File getPartyFilePath()
+   {
+      Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+      String filePath = prefs.get("filePath", null);
+      if (filePath != null) {
+         return new File(filePath);
+      } else {
+         return null;
+      }
+   }
+
+   /**
+    * Returns the last decrypted message received.
+    *
+    * @return plaintext message.
+    */
+   public String getPlainText()
+   {
+      return this.plainText;
+   }
+
+   /**
+    * Returns the main stage.
+    *
+    * @return
+    */
+   public Stage getPrimaryStage()
+   {
+      return primaryStage;
+   }
+
+   /**
     * Returns the Base64 encoded public key for the party.
     *
     * @return the public key for the party.
@@ -580,6 +311,107 @@ public class MainApp extends Application
    public String getPublicKey()
    {
       return encodeBytes(publicKey.getEncoded());
+   }
+
+   /**
+    * @return the publicKeyBase64
+    */
+   public StringProperty getPublicKeyBase64()
+   {
+      return publicKeyBase64;
+   }
+
+   /**
+    * Initializes the root layout and tries to load the last opened party file.
+    */
+   public void initRootLayout()
+   {
+      try {
+         // Load root layout from fxml file.
+         FXMLLoader loader = new FXMLLoader();
+         loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
+         rootLayout = (BorderPane) loader.load();
+
+         // Show the scene containing the root layout.
+         Scene scene = new Scene(rootLayout);
+         primaryStage.setScene(scene);
+
+         // Give the controller access to the main app.
+         RootLayoutController controller = loader.getController();
+         controller.setMainApp(this);
+
+         primaryStage.show();
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+
+      // Try to load last opened party file.
+      File file = getPartyFilePath();
+      if (file != null) {
+         loadPartyDataFromFile(file);
+      }
+   }
+
+   /**
+    * Loads party data from the specified file. The current party data will be
+    * replaced.
+    *
+    * @param file
+    */
+   public void loadPartyDataFromFile(File file)
+   {
+      try {
+         JAXBContext context = JAXBContext.newInstance(PartyListWrapper.class);
+         Unmarshaller um = context.createUnmarshaller();
+
+         // Reading XML from the file and unmarshalling.
+         PartyListWrapper wrapper = (PartyListWrapper) um.unmarshal(file);
+
+         // Clear down the current lists
+         partyData.clear();
+         receivedPublicKeys.clear();
+         secretKeys.clear();
+
+         // Load the party public keys, generate secret keys (if DH) and
+         // observable list
+         for (Party p : wrapper.getPartys()) {
+            receivePublicKeyFrom(p.getIdentifier(), p.getPublicKey());
+         }
+
+         // Save the file path to the registry.
+         setPartyFilePath(file);
+
+      } catch (Exception e) { // catches ANY exception
+         Alert alert = new Alert(AlertType.ERROR);
+         alert.setTitle("Error");
+         alert.setHeaderText("Could not load data");
+         alert.setContentText("Could not load data from file:\n" + file.getPath());
+
+         alert.showAndWait();
+      }
+   }
+
+   /**
+    * Receives an encrypted message and decrypts it.
+    * <p>
+    * This method will decrypt the message that has been encrypted with this
+    * party's public key (RSA).
+    * </p>
+    *
+    * @param message
+    *           byte array containing a message encrypted with this party's
+    *           public key
+    * @throws SecurityException
+    *            decryption of message failed
+    */
+   public void receiveAndDecryptMessage(final byte[] message) throws SecurityException
+   {
+      try {
+         this.plainText = decrypt(message);
+
+      } catch (Exception e) {
+         throw new SecurityException("Decryption failed : ", e);
+      }
    }
 
    /**
@@ -614,39 +446,6 @@ public class MainApp extends Application
       } catch (Exception e) {
          throw new SecurityException("Decryption failed : ", e);
       }
-   }
-
-   /**
-    * Receives an encrypted message and decrypts it.
-    * <p>
-    * This method will decrypt the message that has been encrypted with this
-    * party's public key (RSA).
-    * </p>
-    *
-    * @param message
-    *           byte array containing a message encrypted with this party's
-    *           public key
-    * @throws SecurityException
-    *            decryption of message failed
-    */
-   public void receiveAndDecryptMessage(final byte[] message) throws SecurityException
-   {
-      try {
-         this.plainText = decrypt(message);
-
-      } catch (Exception e) {
-         throw new SecurityException("Decryption failed : ", e);
-      }
-   }
-
-   /**
-    * Returns the last decrypted message received.
-    *
-    * @return plaintext message.
-    */
-   public String getPlainText()
-   {
-      return this.plainText;
    }
 
    /**
@@ -725,11 +524,57 @@ public class MainApp extends Application
    }
 
    /**
-    * @return the publicKeyBase64
+    * Saves the current party data to the specified file.
+    *
+    * @param file
     */
-   public StringProperty getPublicKeyBase64()
+   public void savePartyDataToFile(File file)
    {
-      return publicKeyBase64;
+      try {
+         JAXBContext context = JAXBContext.newInstance(PartyListWrapper.class);
+         Marshaller m = context.createMarshaller();
+         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+         // Wrapping our party data.
+         PartyListWrapper wrapper = new PartyListWrapper();
+         wrapper.setPartys(partyData);
+
+         // Marshalling and saving XML to the file.
+         m.marshal(wrapper, file);
+
+         // Save the file path to the registry.
+         setPartyFilePath(file);
+      } catch (Exception e) { // catches ANY exception
+         Alert alert = new Alert(AlertType.ERROR);
+         alert.setTitle("Error");
+         alert.setHeaderText("Could not save data");
+         alert.setContentText("Could not save data to file:\n" + file.getPath());
+
+         alert.showAndWait();
+      }
+   }
+
+   /**
+    * Sets the file path of the currently loaded file. The path is persisted in
+    * the OS specific registry.
+    *
+    * @param file
+    *           the file or null to remove the path
+    */
+   public void setPartyFilePath(File file)
+   {
+      Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+      if (file != null) {
+         prefs.put("filePath", file.getPath());
+
+         // Update the stage title.
+         primaryStage.setTitle("Crypto Messenger - " + file.getName());
+      } else {
+         prefs.remove("filePath");
+
+         // Update the stage title.
+         primaryStage.setTitle("Crypto Messenger");
+      }
    }
 
    /**
@@ -815,112 +660,258 @@ public class MainApp extends Application
    }
 
    /**
-    * Returns the party file preference, i.e. the file that was last opened. The
-    * preference is read from the OS specific registry. If no such preference
-    * can be found, null is returned.
-    *
-    * @return
+    * Shows the party overview inside the root layout.
     */
-   public File getPartyFilePath()
-   {
-      Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
-      String filePath = prefs.get("filePath", null);
-      if (filePath != null) {
-         return new File(filePath);
-      } else {
-         return null;
-      }
-   }
-
-   /**
-    * Sets the file path of the currently loaded file. The path is persisted in
-    * the OS specific registry.
-    *
-    * @param file
-    *           the file or null to remove the path
-    */
-   public void setPartyFilePath(File file)
-   {
-      Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
-      if (file != null) {
-         prefs.put("filePath", file.getPath());
-
-         // Update the stage title.
-         primaryStage.setTitle("Crypto Messenger - " + file.getName());
-      } else {
-         prefs.remove("filePath");
-
-         // Update the stage title.
-         primaryStage.setTitle("Crypto Messenger");
-      }
-   }
-
-   /**
-    * Loads party data from the specified file. The current party data will be
-    * replaced.
-    *
-    * @param file
-    */
-   public void loadPartyDataFromFile(File file)
+   public void showPartyOverview()
    {
       try {
-         JAXBContext context = JAXBContext.newInstance(PartyListWrapper.class);
-         Unmarshaller um = context.createUnmarshaller();
+         // Load party overview.
+         FXMLLoader loader = new FXMLLoader();
+         loader.setLocation(MainApp.class.getResource("view/PartyOverview.fxml"));
+         AnchorPane partyOverview = (AnchorPane) loader.load();
 
-         // Reading XML from the file and unmarshalling.
-         PartyListWrapper wrapper = (PartyListWrapper) um.unmarshal(file);
+         // Set party overview into the center of root layout.
+         rootLayout.setCenter(partyOverview);
 
-         // Clear down the current lists
-         partyData.clear();
-         receivedPublicKeys.clear();
-         secretKeys.clear();
+         // Give the controller access to the main app.
+         PartyOverviewController controller = loader.getController();
+         controller.setMainApp(this);
 
-         // Load the party public keys, generate secret keys (if DH) and observable list
-         for(Party p : wrapper.getPartys()) {
-            receivePublicKeyFrom(p.getIdentifier(), p.getPublicKey());
-         }
+      } catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
 
-         // Save the file path to the registry.
-         setPartyFilePath(file);
+   @Override
+   public void start(Stage primaryStage)
+   {
+      this.primaryStage = primaryStage;
+      this.primaryStage.setTitle("Crypto Messenger");
 
-      } catch (Exception e) { // catches ANY exception
-         Alert alert = new Alert(AlertType.ERROR);
-         alert.setTitle("Error");
-         alert.setHeaderText("Could not load data");
-         alert.setContentText("Could not load data from file:\n" + file.getPath());
+      // Set the application icon.
+      this.primaryStage.getIcons().add(new Image("file:resources/images/email_message.png"));
 
-         alert.showAndWait();
+      initRootLayout();
+
+      showPartyOverview();
+   }
+
+   /**
+    * The method checks if the pair of public and private key has already been
+    * generated.
+    *
+    * @return flag indicating if the pair of keys were generated.
+    */
+   private boolean areKeysPresent()
+   {
+
+      File privateKey = new File(PRIVATE_KEY_FILE);
+      File publicKey = new File(PUBLIC_KEY_FILE);
+
+      if (privateKey.exists() && publicKey.exists()) {
+         return true;
+      }
+      return false;
+   }
+
+   /**
+    * Decipher a ciphertext which contains and RSA encrypted symmetric AES key and
+    * a message encrypted with that key and the AES encryption algorithm.
+    *
+    * @param cipherText
+    *           the encrypted message
+    * @return the decrypted message
+    * @throws SecurityException
+    *            if the decryption could not be completed
+    */
+   private String decrypt(byte[] cipherText) throws SecurityException
+   {
+      try {
+         // Extract the cipher key from the ciphertext
+         byte[] cipherKey = new byte[256];
+         System.arraycopy(cipherText, 0, cipherKey, 0, cipherKey.length);
+
+         // Decrypt the cipher key using my private key
+         final Cipher cipherDecrypt = Cipher.getInstance("RSA");
+         cipherDecrypt.init(Cipher.DECRYPT_MODE, privateKey);
+         byte[] aesKey = cipherDecrypt.doFinal(cipherKey);
+         SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
+
+         // Extract encrypted portion.
+         int encryptedSize = cipherText.length - cipherKey.length;
+         byte[] encryptedBytes = new byte[encryptedSize];
+         System.arraycopy(cipherText, cipherKey.length, encryptedBytes, 0, encryptedSize);
+
+         return decrypt(encryptedBytes, aeskeySpec);
+      } catch (Exception e) {
+         e.printStackTrace();
+         throw new SecurityException("Decryption failed : ", e);
       }
    }
 
    /**
-    * Saves the current party data to the specified file.
+    * Decipher text encrypted using AES/CBC/PKCS5Padding
     *
-    * @param file
+    * @param cipherText
+    *           the encrypted message
+    * @param secretKeySpec
+    *           key used to encrypt the message
+    * @return the decrypted message
+    * @throws SecurityException
+    *            if the decryption could not be completed
     */
-   public void savePartyDataToFile(File file)
+   private String decrypt(byte[] cipherText, SecretKeySpec secretKeySpec) throws SecurityException
    {
       try {
-         JAXBContext context = JAXBContext.newInstance(PartyListWrapper.class);
-         Marshaller m = context.createMarshaller();
-         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+         // Extract the IV from the ciphertext
+         byte[] iv = new byte[IV_SIZE];
+         System.arraycopy(cipherText, 0, iv, 0, iv.length);
+         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-         // Wrapping our party data.
-         PartyListWrapper wrapper = new PartyListWrapper();
-         wrapper.setPartys(partyData);
+         // Extract encrypted portion.
+         int encryptedSize = cipherText.length - IV_SIZE;
+         byte[] encryptedBytes = new byte[encryptedSize];
+         System.arraycopy(cipherText, IV_SIZE, encryptedBytes, 0, encryptedSize);
 
-         // Marshalling and saving XML to the file.
-         m.marshal(wrapper, file);
+         // Decrypt
+         final Cipher cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+         cipherDecrypt.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+         byte[] plainText = cipherDecrypt.doFinal(encryptedBytes);
 
-         // Save the file path to the registry.
-         setPartyFilePath(file);
-      } catch (Exception e) { // catches ANY exception
-         Alert alert = new Alert(AlertType.ERROR);
-         alert.setTitle("Error");
-         alert.setHeaderText("Could not save data");
-         alert.setContentText("Could not save data to file:\n" + file.getPath());
-
-         alert.showAndWait();
+         return new String(plainText);
+      } catch (Exception e) {
+         throw new SecurityException("Decryption failed : ", e);
       }
+   }
+
+   /**
+    * A helper method to Base64 a byte array.
+    *
+    * @param bytes
+    *           an array of bytes to be encoded.
+    * @return Base64 encoded string representation of the bytes.
+    */
+   private String encodeBytes(final byte[] bytes)
+   {
+      return Base64.getEncoder().encodeToString(bytes);
+   }
+
+   /**
+    * Generate ciphertext using a combination of RSA encryption for a randomly
+    * generated symmetric key and AES encryption for the message.
+    *
+    * @param plainText
+    *           the plain text message
+    * @param publicKey
+    *           the RSA public key to be used to encrypt the message
+    * @return the ciphertext generated
+    * @throws SecurityException
+    *            if the encryption could not be completed
+    */
+   private byte[] encrypt(String plainText, PublicKey publicKey) throws SecurityException
+   {
+      try {
+         // generate a random 256 bit AES key
+         KeyGenerator kgen = KeyGenerator.getInstance("AES");
+         kgen.init(128);
+         SecretKey key = kgen.generateKey();
+         byte[] aesKey = key.getEncoded();
+         SecretKeySpec aeskeySpec = new SecretKeySpec(aesKey, "AES");
+
+         // Encrypt the AES key with the other parties public RSA key
+         Cipher cipher = Cipher.getInstance("RSA");
+         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+         byte[] cipherKey = cipher.doFinal(aesKey);
+
+         // Now use AES encryption to generate the cipherText
+         byte[] encryptedText = encrypt(plainText, aeskeySpec);
+
+         // Combine secret key and encrypted part to form the ciphertext
+         byte[] cipherText = new byte[cipherKey.length + encryptedText.length];
+         System.arraycopy(cipherKey, 0, cipherText, 0, cipherKey.length);
+         System.arraycopy(encryptedText, 0, cipherText, cipherKey.length, encryptedText.length);
+
+         return cipherText;
+      } catch (Exception e) {
+         e.printStackTrace();
+         throw new SecurityException("Encryption failed : ", e);
+      }
+   }
+
+   /**
+    * Generate ciphertext using AES/CBC/PKCS5Padding
+    *
+    * @param plainText
+    *           the plain text message
+    * @param secretKeySpec
+    *           key to be used to encrypt the message
+    * @return the ciphertext generated
+    * @throws SecurityException
+    *            if the encryption could not be completed
+    */
+   private byte[] encrypt(String plainText, SecretKeySpec secretKeySpec) throws SecurityException
+   {
+      try {
+         // Generate the IV.
+         byte[] iv = new byte[IV_SIZE];
+         SecureRandom random = new SecureRandom();
+         random.nextBytes(iv);
+         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+
+         // Encrypt the plaintext
+         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+         byte[] encryptedText = cipher.doFinal(plainText.getBytes());
+
+         // Combine IV and encrypted part to form the ciphertext
+         byte[] cipherText = new byte[IV_SIZE + encryptedText.length];
+         System.arraycopy(iv, 0, cipherText, 0, IV_SIZE);
+         System.arraycopy(encryptedText, 0, cipherText, IV_SIZE, encryptedText.length);
+
+         return cipherText;
+      } catch (Exception e) {
+         throw new SecurityException("Encryption failed : ", e);
+      }
+   }
+
+   /**
+    * Generate key which contains a pair of private and public key. Store the
+    * set of keys in files.
+    *
+    * @throws NoSuchAlgorithmException
+    * @throws IOException
+    * @throws FileNotFoundException
+    */
+   private void generateKeyPair() throws NoSuchAlgorithmException, IOException
+   {
+      final KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithmBasis);
+      keyGen.initialize(KEY_SIZE);
+      final KeyPair keyPair = keyGen.generateKeyPair();
+
+      File privateKeyFile = new File(PRIVATE_KEY_FILE);
+      File publicKeyFile = new File(PUBLIC_KEY_FILE);
+
+      // Create files to store public and private key
+      if (privateKeyFile.getParentFile() != null) {
+         privateKeyFile.getParentFile().mkdirs();
+      }
+      privateKeyFile.createNewFile();
+
+      if (publicKeyFile.getParentFile() != null) {
+         publicKeyFile.getParentFile().mkdirs();
+      }
+      publicKeyFile.createNewFile();
+
+      // Saving the Public key in a file
+      ObjectOutputStream publicKeyOS = new ObjectOutputStream(new FileOutputStream(publicKeyFile));
+      publicKeyOS.writeObject(keyPair.getPublic());
+      publicKeyOS.close();
+
+      // Saving the Private key in a file
+      ObjectOutputStream privateKeyOS = new ObjectOutputStream(
+            new FileOutputStream(privateKeyFile));
+      privateKeyOS.writeObject(keyPair.getPrivate());
+      privateKeyOS.close();
+
    }
 }
