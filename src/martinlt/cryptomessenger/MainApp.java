@@ -830,7 +830,7 @@ public class MainApp extends Application
    private byte[] encrypt(String plainText, PublicKey publicKey) throws SecurityException
    {
       try {
-         // generate a random 256 bit AES key
+         // generate a random AES key
          KeyGenerator kgen = KeyGenerator.getInstance("AES");
          kgen.init(128);
          SecretKey key = kgen.generateKey();
