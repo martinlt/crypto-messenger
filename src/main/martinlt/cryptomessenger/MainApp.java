@@ -127,7 +127,7 @@ public class MainApp extends Application
    /**
     * A plaintext string decrypted from an encrypted message.
     */
-   private String plainText;;
+   private String plainText;
 
    /**
     * A plaintext string decrypted from an encrypted message.
@@ -309,7 +309,10 @@ public class MainApp extends Application
     */
    public String getPlainText()
    {
-      return this.plainText;
+      if(this.plainText == null)
+         return "";
+      else
+         return this.plainText;
    }
 
    /**

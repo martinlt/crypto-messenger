@@ -26,8 +26,8 @@ local.properties
 
 # Locally stored "Eclipse launch configurations"
 *.launch
-/private_my_RSA.key
-/public_my_RSA.key
+/private_*.key
+/public_*.key
 /build/build/
 /build/deploy/
 /build/project/
