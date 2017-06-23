@@ -51,7 +51,7 @@
 			</fileset>
 		</copy>
 
-		<javac includeantruntime="false" source="1.8" target="1.8" srcdir="build/src" destdir="build/classes" encoding="Cp1252">
+		<javac includeantruntime="false" source="1.8" target="1.8" srcdir="build/src/main" destdir="build/classes" encoding="Cp1252">
 			<classpath>
 				<fileset dir="build/libs">
 					<include name="*"/>

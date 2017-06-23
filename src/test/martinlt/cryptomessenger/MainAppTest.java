@@ -32,6 +32,12 @@ public class MainAppTest extends TestCase
    protected void tearDown() throws Exception
    {
       super.tearDown();
+      if(bob != null) {
+         bob.removeKeys();
+      }
+      if(alice != null) {
+         alice.removeKeys();
+      }
    }
 
    @Test

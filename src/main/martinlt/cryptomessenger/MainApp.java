@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -244,6 +245,7 @@ public class MainApp extends Application
 
    /**
     * Returns the key exchange pattern currently in use (RSA or DH)
+    *
     * @return
     */
    public String getAlgorithmBasis()
@@ -309,7 +311,7 @@ public class MainApp extends Application
     */
    public String getPlainText()
    {
-      if(this.plainText == null)
+      if (this.plainText == null)
          return "";
       else
          return this.plainText;
@@ -342,9 +344,8 @@ public class MainApp extends Application
       String base64Key = Base64.getEncoder().encodeToString(key.getEncoded());
 
       // Return in PEM format
-      return "-----BEGIN PUBLIC KEY-----\n" +
-            base64Key.replaceAll("(.{64})", "$1\n") +
-            "\n-----END PUBLIC KEY-----\n";
+      return "-----BEGIN PUBLIC KEY-----\n" + base64Key.replaceAll("(.{64})", "$1\n")
+            + "\n-----END PUBLIC KEY-----\n";
    }
 
    /**
@@ -506,7 +507,8 @@ public class MainApp extends Application
          throws SecurityException
    {
       try {
-         String unwrappedPEM = publicKey.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replace("\n","");
+         String unwrappedPEM = publicKey.replace("-----BEGIN PUBLIC KEY-----", "")
+               .replace("-----END PUBLIC KEY-----", "").replace("\n", "");
 
          byte[] byteKey = Base64.getDecoder().decode(unwrappedPEM);
 
@@ -751,8 +753,8 @@ public class MainApp extends Application
    }
 
    /**
-    * Decipher a ciphertext which contains and RSA encrypted symmetric AES key and
-    * a message encrypted with that key and the AES encryption algorithm.
+    * Decipher a ciphertext which contains and RSA encrypted symmetric AES key
+    * and a message encrypted with that key and the AES encryption algorithm.
     *
     * @param cipherText
     *           the encrypted message
@@ -949,5 +951,15 @@ public class MainApp extends Application
       privateKeyOS.writeObject(keyPair.getPrivate());
       privateKeyOS.close();
 
+   }
+
+   protected void removeKeys()
+   {
+      try {
+
+         new File(PRIVATE_KEY_FILE).delete();
+         new File(PUBLIC_KEY_FILE).delete();
+
+      } catch (Exception ignored) { }
    }
 }
